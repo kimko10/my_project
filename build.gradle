@@ -1,0 +1,61 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.5.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+group = 'com.carrot'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+	developmentOnly
+	runtimeClasspath {
+		extendsFrom developmentOnly
+	}
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven {
+        url 'https://repo.spring.io/libs-milestone'
+    }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.1'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+	
+	compile group: 'com.zaxxer', name: 'HikariCP', version: '2.3.2'
+	// spring security
+	//compile("org.springframework.boot:spring-boot-starter-security")
+	// log4jdbc
+	compile ('org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4:1.16')
+	compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.5.4'
+	// Swagger
+	compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.5.0'
+	compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.5.0'
+	// jsp 연동
+	compile('org.apache.tomcat.embed:tomcat-embed-jasper')
+	compile('javax.servlet:jstl')
+	// mobile
+	// https://mvnrepository.com/artifact/org.springframework.mobile/spring-mobile-device
+//compile group: 'org.springframework.mobile', name: 'spring-mobile-device', version: '1.1.5.RELEASE'
+	compile 'org.springframework.mobile:spring-mobile-device:2.0.0.M3'
+
+
+
+}
+
+test {
+	useJUnitPlatform()
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.carrot.common.mapper.ObjectMapper">
+    <select id="selectAll" resultType="Map">
+        ${sql}
+    </select>
+
+    <select id="selectOne" resultType="Map">
+        ${sql}
+    </select>
+
+    <update id="update" >
+        UPDATE ${table} set
+             <foreach item="value" index="key" collection="data" separator=",">
+				  	${key} = #{value}
+		     </foreach>
+        WHERE ${where}
+    </update>
+
+    <insert id="insert" >
+        INSERT INTO ${table} set
+             <foreach item="value" index="key" collection="data" separator=",">
+				  	${key} = #{value}
+		     </foreach>
+    </insert>
+
+    <delete id="delete" >
+        DELETE ${table} where
+             <foreach item="value" index="key" collection="data" separator=" and ">
+				  	${key} = #{value}
+		     </foreach>
+    </delete>
+</mapper>

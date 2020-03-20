@@ -1,0 +1,51 @@
+spring:
+  profiles:
+    active: local
+  ##UTF-8 설정
+  http:
+    encoding:
+      charset: UTF-8
+      enable: true
+      force: true
+--- ## local 환경
+# DB설정
+# properties 파일로 할 때
+#spring.datasource.username=itest
+#spring.datasource.password=dusrn1
+#spring.datasource.url=jdbc:mariadb://mxm.kr:23306/itest
+#spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+# properties 파일로 하고 hikariCP 사용 때
+#spring.datasource.hikari.username=itest
+#spring.datasource.hikari.password=dusrn1
+#spring.datasource.hikari.jdbc-url=jdbc:mariadb://mxm.kr:23306/itest
+#spring.datasource.hikari.driver-class-name=org.mariadb.jdbc.Driver
+spring: 
+   profiles: local
+   datasource:
+    hikari:
+     #username: carrot
+     #password: ghavpdlwl1
+     #jdbc-url: jdbc:log4jdbc:mariadb://49.247.213.177:23306/carrot_farm
+     username: kudertest
+     password: kuder1234
+     jdbc-url: jdbc:mariadb://localhost:3306/kuderlocal
+     #jdbc-url : jdbc:mariadb://mxm.kr:23306/itest
+     driver-class-name : org.mariadb.jdbc.Driver 
+     #jdbc-url: jdbc:log4jdbc:mariadb://mxm.kr:23306/itest
+    # driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+   #mvc:
+    #view:
+      #prefix: /WEB-INF/jsp
+      #suffix: .jsp
+     maximum-pool-size: 5
+     auto-commit: false
+
+spring.profiles.include: console-logging
+
+--- ## 개발환경
+spring:
+  profiles: dev
+
+#spring.profiles.include: console-logging, file-logging
+
+

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.carrot.kuder.user.KuderUserMapper">
+
+    <resultMap id="KuderUserMap" type="com.carrot.kuder.user.KuderUserVO">
+    	<result property="userId" jdbcType="INTEGER" column="user_id"/>
+        <result property="userEmail" jdbcType="VARCHAR" column="user_email" />
+        <result property="userPassword" jdbcType="VARCHAR" column="usre_password"/>
+        <result property="userName" jdbcType="VARCHAR" column="user_name"/>
+        <result property="userPhone" jdbcType="VARCHAR" column="user_phone"/>
+        <result property="registDate" jdbcType="DATE" column="regist_date"/>
+        <result property="updateDate" jdbcType="DATE" column="update_date"/>
+        <result property="authorityCode" jdbcType="VARCHAR" column="authority_code"/>
+    </resultMap>
+
+	<select id="selectUser" resultMap ="KuderUserMap" parameterType="int">
+		/* UserMapper.selectUser : 사용자정보 조회 */
+		SELECT
+			user_id
+			, user_email
+			, user_name
+			, user_phone
+			, authority_code
+		FROM 
+			kuder_user
+		WHERE
+			user_id = #{userId}
+	</select>
+<!-- 
+	
+	<select id="" resultMap ="">
+	/* UserMapper.selectUserTins : 사용자 tins 조회 */
+	</select>
+	 -->
+	<select id="checkUser" parameterType ="String" resultType="int">
+	
+		/* KuderUserMapper.checkUser : 사용자정보 중복체크 */
+		SELECT 
+			count(*)
+		FROM
+			kuder_user
+		WHERE
+			user_email = #{userEmail}
+	
+	</select>
+	
+	<select id="checkActivationCode" parameterType ="String" resultType="int">
+		/* KuderUserMapper.checkActivationCode : 엑티베이션 코드 체크 */
+		SELECT 
+			count(*)
+		FROM
+			kuder_activation_code
+		WHERE
+			activation_code = #{activationCode}
+		AND
+			use_type = 'Y'
+	</select>
+	
+	<insert id="insertUser" parameterType ="com.carrot.kuder.user.KuderUserVO">
+		/* KuderUserMapper.insertUser : 사용자정보 추가 */
+		INSERT INTO kuder_user (
+			user_email
+			, user_password
+			, user_name
+			, user_phone
+			, authority_code
+			, regist_date
+		) VALUES (
+			#{userEmail}
+			, #{userPassword}
+			, #{userName}
+			, #{userPhone}
+			, #{authorityCode}
+			, DATE_FORMAT(NOW(), '%y-%m-%d %T')
+		)
+	</insert>
+	
+	<insert id="insertActivationCode" parameterType ="com.carrot.kuder.user.KuderActivationCodeVO">
+		/* KuderUserMapper.insertActivationCode : activation코드 등록 */
+		INSERT INTO kuder_activation_code (
+			activation_code
+			, total_count
+			, able_count
+			, unable_count
+			, product_name
+			, service_start_date
+			, service_end_date
+			, user_type
+			, bb_group_code
+			, user_email
+			, use_type
+		) VALUES (
+			#{activationCode}
+			, #{totalCount}
+			, #{ableCount}
+			, 0
+			, #{productName}
+			, DATE_FORMAT(NOW(), '%y-%m-%d %T')
+			, DATE_FORMAT(date_add(NOW(), interval + 12 month), '%y-%m-%d %T')
+			, #{userType}
+			<choose>
+				<when test="bbGroupCode == -1">
+					, null
+				</when>
+				<otherwise>
+					, #{bbGroupCode}
+				</otherwise>
+			</choose>
+			, #{userEmail}
+			, 'Y'
+		)
+	
+	</insert>
+	
+	<insert id="insertTinNum" parameterType ="com.carrot.kuder.user.KuderTinVO">
+		/* KuderUserMapper.insertTinNum : tin번호 추가 */
+		<selectKey keyProperty="tinNumber" resultType="String" order="AFTER">
+			SELECT tin_number FROM kuder_assessment WHERE activation_code = #{activationCode} AND user_email = #{userEmail}
+		</selectKey>
+		INSERT INTO kuder_assessment (
+			tin_number
+			, user_email
+			, product_name
+			, assessment_count
+			, assessment_YN
+			, service_start_date
+			, service_end_date
+			, activation_code
+			, use_type
+		) VALUES (
+			CONCAT(#{activationCode}, '_', (SELECT unable_count FROM kuder_activation_code WHERE activation_code = #{activationCode}))
+			, #{userEmail}
+			, (SELECT product_name FROM kuder_activation_code WHERE activation_code = #{activationCode})
+			, 0
+			, 'N'
+			, DATE_FORMAT(NOW(), '%y-%m-%d %T')
+			<!-- , DATE_FORMAT(date_add(NOW(), interval + 12 month), '%y-%m-%d %T') -->
+			, (SELECT service_end_date FROM kuder_activation_code WHERE activation_code = #{activationCode})
+			, #{activationCode}
+			, 'Y'
+		)
+	</insert>
+	
+	<update id="updateActivationCodeNum" parameterType="com.carrot.kuder.user.KuderActivationCodeVO">
+		/* KuderUserMapper.updateActivationCodeNum : activation Code 수량 수정 */
+		UPDATE 
+			kuder_activation_code A
+		SET
+			A.able_count = IF(able_count > '0', able_count - 1, able_count)
+			, A.unable_count = IF(able_count > '0', unable_count + 1, unable_count)
+			, A.use_type = IF(able_count = '0', 'N', 'Y')
+		WHERE ( 
+			able_count
+			, unable_count
+		) IN (
+			SELECT
+				able_count
+				, unable_count
+			FROM
+				kuder_activation_code
+			WHERE
+				activation_code = #{activationCode}
+			AND
+				use_type = 'Y'			
+			)
+	</update>
+	
+	
+	<update id="updateUser" parameterType ="com.carrot.kuder.user.KuderUserVO">
+		/* UserMapper.updateUser : 사용자정보 수정 */
+		UPDATE 
+			kuder_user
+		SET
+			user_name = #{userName}
+			, user_phone = #{userPhone}
+			, update_date = DATE_FORMAT(NOW(), '%y-%m-%d %T')
+		WHERE
+			user_email = #{userEmail}
+		AND
+			user_id = #{userId}
+		
+	</update>
+	<!-- 
+	
+	<delete id="" parameterType ="">
+	/* UserMapper.deleteUser : 사용자정보 삭제 */
+	</delete>
+	
+	<update id="" parameterType ="">
+	/* UserMapper.updateUserPassword : 사용자패스워드 수정 */
+	</update>
+	
+	<update id="" parameterType ="">
+	/* UserMapper.initUserPassword : 사용자패스워드 초기화 */
+	</update>
+	 -->
+	
+</mapper>
