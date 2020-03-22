@@ -1,6 +1,7 @@
 package com.carrot.kuder.login;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpServerErrorException;
 
 import com.carrot.kuder.user.KuderActivationCodeVO;
 import com.carrot.kuder.user.KuderUserDTO;
@@ -27,7 +29,7 @@ public class KuderLoginController {
 	
 	// login
 	@PostMapping("/login")
-	public KuderUserWrapper login(@RequestBody KuderUserDTO dto, HttpServletRequest request) throws Exception {
+	public KuderUserWrapper login(@RequestBody KuderUserDTO dto, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
 		log.info("login 시도");
 		
@@ -38,6 +40,7 @@ public class KuderLoginController {
 		String tin = "";
 		HttpSession session = request.getSession();
 		
+		/*
 		// 1. activationcode 체크
 		KuderActivationCodeVO avo = kuderUserService.selectActivationCode(dto.getActivationCode());
 		
@@ -69,6 +72,8 @@ public class KuderLoginController {
 		}
 		session.setAttribute("user", dto);
 		session.setAttribute("tin", wrap.getTin());
+		 */
+		session.setAttribute("test", "뭐야");
 		return wrap;
 	}
 	

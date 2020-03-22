@@ -24,7 +24,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 		boolean result = false;
 		
 		if(request.getSession() != null) {
-			System.out.println(request.getSession().getAttribute("user"));
+			System.out.println(request.getSession().getAttribute("test"));
 			result = true;
 		}
 		
