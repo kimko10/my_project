@@ -4,41 +4,25 @@
 
 <mapper namespace="com.carrot.kuder.group.KuderGroupMapper">
 
-	<resultMap id="KuderUserMap" type="com.carrot.kuder.user.KuderUserVO">
-    	<result property="userId" jdbcType="INTEGER" column="user_id"/>
-        <result property="userEmail" jdbcType="VARCHAR" column="user_email" />
-        <result property="userPassword" jdbcType="VARCHAR" column="usre_password"/>
-        <result property="userName" jdbcType="VARCHAR" column="user_name"/>
-        <result property="userPhone" jdbcType="VARCHAR" column="user_phone"/>
-        <result property="registDate" jdbcType="DATE" column="regist_date"/>
-        <result property="updateDate" jdbcType="DATE" column="update_date"/>
-        <result property="authorityCode" jdbcType="VARCHAR" column="authority_code"/>
-    </resultMap>
-    
     <!-- KuderUserMapper.insertGroup : 그룹등록 -->
 	<insert id="insertGroup" parameterType="com.carrot.kuder.group.KuderGroupVO">
-		<selectKey keyProperty="bbGroupCode" resultType="int" order="AFTER">
-			SELECT bb_group_code FROM kuder_bb_group
-		</selectKey>
 		/* KuderUserMapper.insertGroup : 그룹등록 */
 		INSERT INTO kuder_bb_group (
 			bb_group_name
-			, company_name
-			, company_address
-			, company_site
-			, b_manager_name
-			, c_manager_email
+			, idx_kuder_company
+			, idx_hq
+			, idx_kuder_admin
 			, regist_date
 		) VALUES (
 			#{bbGroupName}
-			, #{companyName}
-			, #{companyAddress}
-			, #{companySite}
-			, #{bManagerName}
-			, #{cManagerEmail}
+			, #{idxKuderCompany}
+			, #{idxHq}
+			, #{idxKuderAdmin}
 			, DATE_FORMAT(NOW(), '%y-%m-%d %T')
 		)
-	
+		<selectKey keyProperty="idx" resultType="int" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
 	</insert>
 	
 	<!-- KuderUserMapper.insertCompany : 회사등록 -->
@@ -46,9 +30,32 @@
 		/* KuderUserMapper.insertCompany : 회사등록 */
 		INSERT INTO kuder_company (
 			company_name
+			, company_address
+			, company_site
+			, create_date
 		) VALUES (
 			#{companyName}
+			, #{companyAddress}
+			, #{companySite}
+			, DATE_FORMAT(NOW(), '%y-%m-%d %T')
 		)
+		<selectKey keyProperty="idx" resultType="int" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
 	</insert>
+	
+	<!-- 회사 정보 -->
+	<select id="selectCompany" parameterType="String" resultType="com.carrot.kuder.group.KuderCompanyVO">
+		/* KuderUserMapper.selectCompany : 회사등록 */
+		SELECT
+			idx
+			, company_name
+			, company_address
+			, company_site
+		FROM
+			kuder_company
+		WHERE
+			company_name = #{companyName}	
+	</select>
 	
 </mapper>

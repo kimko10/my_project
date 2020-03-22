@@ -33,35 +33,29 @@ public class KuderPayService extends AbstractService {
 		// 회원가입 진행
 		// 엑티베이션 코드 등록
 		KuderUserDTO userdto = new KuderUserDTO();
-		String result = "";
+		String actv = "";
 		
 		// 이미 가입한 회원인지 체크
 		if(kuderUserService.checkUser(dto.getUserEmail())) {
 			
 			userdto.setUserEmail(dto.getUserEmail());
-			userdto.setAuthorityCode("MANAGER");
 			userdto.setUserName(dto.getUserName());
 			userdto.setUserPhone(dto.getUserPhone());
 			userdto.setUserPassword(dto.getUserPassword());
-			KuderUserVO vo = userdto;
 			
-			if(kuderUserMapper.insertUser(vo) >0) {
-				result = "insertuser success";			// 사용자 등록 성공
-			} else {
-				result = "insertuser fail";					// 사용자 등록 실패
-			}
+			kuderUserService.insertUser(userdto);
+			log.info("#### 결제자 회원가입");
 			
 		} else {
 			log.info("##### 이미 가입한 사용자 입니다.");
 		}
 		
 		// 사용자 등록 성공했거나 이미 등록한 사용자일 경우
-		if(!"insertuser fail".equals(result)) {
-			// 엑티베이션 코드 등록
-			result = kuderUserService.insertActivationCode(dto.getUserEmail(), dto.getProductName(), -1, dto.getTotalCount());
-		}
+		// 엑티베이션 코드 등록
+		actv = kuderUserService.insertActivationCode(dto.getUserEmail(), dto.getProductName(), -1, dto.getTotalCount());
+		log.info("#### activation code : " + actv);
 		
-		return result;
+		return actv;
 		
 	}
 }

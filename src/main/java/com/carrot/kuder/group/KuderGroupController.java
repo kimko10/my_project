@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 
-@RestController
+//@RestController
 @RequestMapping("/group")
 @Slf4j
 public class KuderGroupController {
@@ -37,7 +37,7 @@ public class KuderGroupController {
 		
 		// 호출되려나? // 서비스에서 바로 하려나?
 		// company 부터 중복되는지 체크
-		//actv = kuderGroupService.insertGroup(gdto, cdto);
+		actv = kuderGroupService.insertGroup(dto);
 		kpw.setActivationCode(actv);
 		// company 정보
 		//kpw.setCompany(dto.getCompanyName());

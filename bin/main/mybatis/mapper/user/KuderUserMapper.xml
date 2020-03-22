@@ -4,29 +4,30 @@
 
 <mapper namespace="com.carrot.kuder.user.KuderUserMapper">
 
-    <resultMap id="KuderUserMap" type="com.carrot.kuder.user.KuderUserVO">
-    	<result property="userId" jdbcType="INTEGER" column="user_id"/>
+	<resultMap id="KuderUserMap" type="com.carrot.kuder.user.KuderUserVO">
+    	<result property="idx" jdbcType="INTEGER" column="idx"/>
         <result property="userEmail" jdbcType="VARCHAR" column="user_email" />
-        <result property="userPassword" jdbcType="VARCHAR" column="usre_password"/>
+        <result property="userPassword" jdbcType="VARCHAR" column="user_password"/>
         <result property="userName" jdbcType="VARCHAR" column="user_name"/>
         <result property="userPhone" jdbcType="VARCHAR" column="user_phone"/>
-        <result property="registDate" jdbcType="DATE" column="regist_date"/>
+        <result property="createDate" jdbcType="DATE" column="create_date"/>
         <result property="updateDate" jdbcType="DATE" column="update_date"/>
-        <result property="authorityCode" jdbcType="VARCHAR" column="authority_code"/>
     </resultMap>
-
-	<select id="selectUser" resultMap ="KuderUserMap" parameterType="int">
+    
+	<select id="selectUser" resultMap ="KuderUserMap" parameterType="com.carrot.kuder.user.KuderUserVO">
 		/* UserMapper.selectUser : 사용자정보 조회 */
 		SELECT
-			user_id
+			idx
 			, user_email
+			, user_password
 			, user_name
 			, user_phone
-			, authority_code
 		FROM 
 			kuder_user
 		WHERE
-			user_id = #{userId}
+			idx = #{idx}
+		OR
+			user_email = #{userEmail}
 	</select>
 <!-- 
 	
@@ -46,16 +47,30 @@
 	
 	</select>
 	
-	<select id="checkActivationCode" parameterType ="String" resultType="int">
-		/* KuderUserMapper.checkActivationCode : 엑티베이션 코드 체크 */
+	<select id="selectActivationCode" parameterType ="String" resultType="com.carrot.kuder.user.KuderActivationCodeVO">
+		/* KuderUserMapper.selectActivationCode : 엑티베이션 코드 체크 */
 		SELECT 
-			count(*)
+			idx
+			, activation_code
+			, total_count
+			, able_count
+			, unable_count
+			, product_name
+			, user_type
+			, idx_kuder_bb_group
+			, user_email
 		FROM
 			kuder_activation_code
 		WHERE
 			activation_code = #{activationCode}
 		AND
 			use_type = 'Y'
+		<![CDATA[
+		AND
+			service_start_date <= DATE_FORMAT(NOW(), '%y-%m-%d %T')
+		AND
+			service_end_date >= DATE_FORMAT(NOW(), '%y-%m-%d %T')
+		]]>
 	</select>
 	
 	<insert id="insertUser" parameterType ="com.carrot.kuder.user.KuderUserVO">
@@ -65,16 +80,17 @@
 			, user_password
 			, user_name
 			, user_phone
-			, authority_code
-			, regist_date
+			, create_date
 		) VALUES (
 			#{userEmail}
 			, #{userPassword}
 			, #{userName}
 			, #{userPhone}
-			, #{authorityCode}
 			, DATE_FORMAT(NOW(), '%y-%m-%d %T')
 		)
+		<selectKey keyProperty="idx" resultType="int" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
 	</insert>
 	
 	<insert id="insertActivationCode" parameterType ="com.carrot.kuder.user.KuderActivationCodeVO">
@@ -88,9 +104,10 @@
 			, service_start_date
 			, service_end_date
 			, user_type
-			, bb_group_code
+			, idx_kuder_bb_group
 			, user_email
 			, use_type
+			, create_date
 		) VALUES (
 			#{activationCode}
 			, #{totalCount}
@@ -101,15 +118,16 @@
 			, DATE_FORMAT(date_add(NOW(), interval + 12 month), '%y-%m-%d %T')
 			, #{userType}
 			<choose>
-				<when test="bbGroupCode == -1">
+				<when test="idxKuderBbGroup == -1">
 					, null
 				</when>
 				<otherwise>
-					, #{bbGroupCode}
+					, #{idxKuderBbGroup}
 				</otherwise>
 			</choose>
 			, #{userEmail}
 			, 'Y'
+			, DATE_FORMAT(NOW(), '%y-%m-%d %T')
 		)
 	
 	</insert>
@@ -117,29 +135,32 @@
 	<insert id="insertTinNum" parameterType ="com.carrot.kuder.user.KuderTinVO">
 		/* KuderUserMapper.insertTinNum : tin번호 추가 */
 		<selectKey keyProperty="tinNumber" resultType="String" order="AFTER">
-			SELECT tin_number FROM kuder_assessment WHERE activation_code = #{activationCode} AND user_email = #{userEmail}
+			SELECT tin_number FROM kuder_assessment WHERE idx_kuder_activation_code = #{idxKuderActivationCode} AND idx_kuder_user = #{idxKuderUser} AND create_date = DATE_FORMAT(NOW(), '%y-%m-%d %T')
 		</selectKey>
 		INSERT INTO kuder_assessment (
 			tin_number
-			, user_email
+			, idx_kuder_user
 			, product_name
 			, assessment_count
 			, assessment_YN
 			, service_start_date
 			, service_end_date
-			, activation_code
+			, idx_kuder_activation_code
 			, use_type
+			, create_date
 		) VALUES (
-			CONCAT(#{activationCode}, '_', (SELECT unable_count FROM kuder_activation_code WHERE activation_code = #{activationCode}))
-			, #{userEmail}
-			, (SELECT product_name FROM kuder_activation_code WHERE activation_code = #{activationCode})
+			CONCAT((SELECT activation_code FROM kuder_activation_code WHERE idx = #{idxKuderActivationCode}), 
+			'_', (SELECT unable_count FROM kuder_activation_code WHERE idx = #{idxKuderActivationCode}))
+			, #{idxKuderUser}
+			, (SELECT product_name FROM kuder_activation_code WHERE idx = #{idxKuderActivationCode})
 			, 0
 			, 'N'
 			, DATE_FORMAT(NOW(), '%y-%m-%d %T')
 			<!-- , DATE_FORMAT(date_add(NOW(), interval + 12 month), '%y-%m-%d %T') -->
-			, (SELECT service_end_date FROM kuder_activation_code WHERE activation_code = #{activationCode})
-			, #{activationCode}
+			, (SELECT service_end_date FROM kuder_activation_code WHERE idx = #{idxKuderActivationCode})
+			, #{idxKuderActivationCode}
 			, 'Y'
+			, DATE_FORMAT(NOW(), '%y-%m-%d %T')
 		)
 	</insert>
 	
@@ -161,7 +182,7 @@
 			FROM
 				kuder_activation_code
 			WHERE
-				activation_code = #{activationCode}
+				idx = #{idx}
 			AND
 				use_type = 'Y'			
 			)
@@ -179,7 +200,7 @@
 		WHERE
 			user_email = #{userEmail}
 		AND
-			user_id = #{userId}
+			idx = #{idx}
 		
 	</update>
 	<!-- 

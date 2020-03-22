@@ -1,7 +1,6 @@
 package com.carrot.kuder.user;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface KuderUserMapper {
@@ -10,7 +9,7 @@ public interface KuderUserMapper {
 	 * 사용자정보 조회
 	 * 
 	 */
-	public KuderUserVO selectUser(@Param("userId") int userId);
+	public KuderUserVO selectUser(KuderUserVO vo);
 	
 	/**
 	 * 사용자 tin 조회
@@ -22,7 +21,7 @@ public interface KuderUserMapper {
 	 * 사용자정보 중복체크
 	 * count
 	 */
-	public int checkUser(@Param("userEmail") String userEmail);
+	public int checkUser(String userEmail);
 	
 	/**
 	 * 사용자정보 추가
@@ -45,12 +44,12 @@ public interface KuderUserMapper {
 	/**
 	 * activation코드 체크
 	 */
-	public int checkActivationCode(String activationCode);
+	public KuderActivationCodeVO selectActivationCode(String activationCode);
 	
 	/**
 	 * activation 코드 수량 수정
 	 */
-	public int updateActivationCodeNum(String activationCode);
+	public int updateActivationCodeNum(int idx);
 	
 	
 	/**

@@ -13,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CommonVO {
 
-	Date registDate;
+	Date createDate;
 	Date updateDate;
 	
 }

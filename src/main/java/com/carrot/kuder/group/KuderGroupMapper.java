@@ -4,7 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-@Mapper
+//@Mapper
 public interface KuderGroupMapper {
 	
 	/**
@@ -15,12 +15,11 @@ public interface KuderGroupMapper {
 	/**
 	 * company 등록
 	 */
-	public int insertCompany(KuderCompanyVO vo);
+	public KuderCompanyVO insertCompany(KuderCompanyVO vo);
 	
 	/**
 	 * company 중복 체크
 	 */
-	@Select("SELECT COUNT(*) FROM kuder_company WHERE companyName = #{companyName}")
-	public int checkCompany(@Param("companyName") String companyName);
+	public KuderCompanyVO selectCompany(String companyName);
 
 }

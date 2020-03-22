@@ -1,9 +1,8 @@
 package com.carrot.kuder.user;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,25 +26,25 @@ public class KuderUserService extends AbstractService {
 	 * 사용자정보 조회
 	 * 
 	 */
-	/*
-	 * public KuderUserVO selectUser(int id) throws Exception {
-	 * 
-	 * //KuderUserVO vo = mapper.selectUser(id); KuderUserVO vo =
-	 * mapper.selectUser(id);
-	 * 
-	 * log.info("kuderUserselect : " + vo.toString()); return vo; }
-	 */
+	  public KuderUserVO selectUser(KuderUserDTO dto) throws Exception {
+	  
+		  KuderUserVO vo = dto; 
+		  vo = mapper.selectUser(vo);
+		  
+		  log.info("kuderUserselect : " + vo.toString()); 
+		  return vo;
+	  }
 	
-	public Map<Object, Object> selectUser(int idx) {
-        String sql  = "select * from kuder_user where user_id=" + String.valueOf(idx) + " limit 1";
-        Map<Object, Object> info = omapper.selectOne(sql);
-
-        Map<Object, Object> result = new HashMap<Object, Object>();
-        result.put("err", 0);
-        result.put("data", info);
-
-        return result;
-    }
+	/*
+	 * public Map<Object, Object> selectUser(int idx) { String sql =
+	 * "select * from kuder_user where user_id=" + String.valueOf(idx) + " limit 1";
+	 * Map<Object, Object> info = omapper.selectOne(sql);
+	 * 
+	 * Map<Object, Object> result = new HashMap<Object, Object>(); result.put("err",
+	 * 0); result.put("data", info);
+	 * 
+	 * return result; }
+	 */
 
 	
 	/**
@@ -80,88 +79,57 @@ public class KuderUserService extends AbstractService {
 	 * 사용자정보 추가
 	 * 
 	 */
-	public String insertUser(KuderUserDTO dto) throws Exception { 
-		/*
-		PasswordEncoder passwordencoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+	public int insertUser(KuderUserDTO dto) throws Exception { 
 		
-		dto.setUserPassword(passwordencoder.encode(dto.getUserPassword()));
-		*/
-		dto.setAuthorityCode("MEMBER");
+		// 비밀번호 암호화
+		dto.setUserPassword(BCrypt.hashpw(dto.getUserPassword(), BCrypt.gensalt()));
 		KuderUserVO vo = dto;
+		
+		if(mapper.insertUser(vo) >0) {
+			log.info("##### 가입 성공");
+		} else {
+			log.info("##### 가입 실패");
+		}
 		
 		log.info("#### KuderUserService.insertUser : " + vo.toString());
 		
-		String result = "";
-		
-		// 사용자가 없으면 insert 해주고 아래 로직 이어서
-		// 여기와서 중복체크 해도 되고 로그인할 때나 결제성공 시 B2B등록시에 중복체크해도 됨
-		if (checkUser(dto.getUserEmail())) {
-			if(mapper.insertUser(vo) >0) {
-				log.info("##### 가입 성공");
-				result = "insertuser success";
-			} else {
-				log.info("##### 가입 실패");
-				result = "insertuser fail";
-			}
-		} else {
-			log.info("#### 이미 가입한 사용자 입니다.");
-		}
-		
-		if(!"insertuser fail".equals(result)) {
-			// 엑티베이션 코드 올바르게 넣었는지 확인
-			if(checkActivationCode(dto.getActivationCode())) {
-				result = insertTinNum(dto.getUserEmail(), dto.getActivationCode()); // TIN 넘버 생성
-				// result = tin 넘버 넣어줌 
-			} else {
-				log.info("#### activation code가 올바르지 않습니다.");
-				result = "incorrect activation code";
-			}
-		}
-		
-		log.info("#### result : " + result);
-		return result;
+		return vo.getIdx();
 	}
-	
 	
 	/**
 	 * activation Code 체크
 	 * 
 	 */
-	public boolean checkActivationCode(String activationCode) {
+	public KuderActivationCodeVO selectActivationCode(String activationCode) {
 		
-		boolean result = false;
 		
-		if(mapper.checkActivationCode(activationCode) > 0) {
-			result = true;
-		}
-		
-		return result;
+		return mapper.selectActivationCode(activationCode);
 	}
 	
 	/**
 	 * tin num 등록
 	 * 
 	 */
-	public String insertTinNum(String userEmail, String activationCode) throws Exception {
+	public String insertTinNum(int userIdx, int activatinoCodeIdx) throws Exception {
 		
 		log.info("#### userService.insertTinNum ");
 		// tin table에 등록하고 activation table 수정도 해줘야됨..
 		KuderTinDTO dto = new KuderTinDTO();
-		dto.setUserEmail(userEmail);
-		dto.setActivationCode(activationCode);
+		
+		dto.setIdxKuderUser(userIdx);
+		dto.setIdxKuderActivationCode(activatinoCodeIdx);
 		KuderTinVO vo = dto;
 		String tin = ""; 
 		
 		// tin 생성 성공
 		if(mapper.insertTinNum(vo) > 0) {
 			// activation code 데이터 수정(카운트)
-			mapper.updateActivationCodeNum(activationCode);
+			mapper.updateActivationCodeNum(activatinoCodeIdx);
 			log.info("#### tin number : " + dto.getTinNumber());
 			tin = dto.getTinNumber();
 		} else {
 			tin = "insert tin number fail";
 		}
-		
 		
 		return tin;
 	}
@@ -171,7 +139,7 @@ public class KuderUserService extends AbstractService {
 	 * 결제로 생성되는 activation은 userType = B2C
 	 * B2B등록으로 생성되는 activation은 userType = B2B
 	 */
-	public String insertActivationCode(String userEmail, String productName, int bbGroupCode, int totalCount) throws Exception { 
+	public String insertActivationCode(String userEmail, String productName, int idxKuderBbGroup, int totalCount) throws Exception { 
 
 		log.info("#### userService.insertActivationCode ");
 		
@@ -183,8 +151,8 @@ public class KuderUserService extends AbstractService {
 		dto.setAbleCount(totalCount);
 		dto.setUserEmail(userEmail);
 		dto.setProductName(productName);
-		dto.setBbGroupCode(bbGroupCode);
-		if(bbGroupCode != -1) {
+		dto.setIdxKuderBbGroup(idxKuderBbGroup);
+		if(idxKuderBbGroup != -1) {
 			userType = "B2B";
 		} else {
 			userType = "B2C";
@@ -273,9 +241,14 @@ public class KuderUserService extends AbstractService {
 	
 	/**
 	 * 현재비밀번호 맞게 넣었는지 체크
-	 * 
+	 * BCrypt.checkpw(password, hashed);
+	 * hashed 는 DB에 저장된 비밀번호
 	 */
-	// public void checkUserCurrentPassword() throws Exception {}
+	public boolean checkUserCurrentPassword(String password, String hashPassword) throws Exception {
+		
+		return BCrypt.checkpw(password, hashPassword);
+		
+	}
 	
 	/**
 	 * 사용자패스워드 수정

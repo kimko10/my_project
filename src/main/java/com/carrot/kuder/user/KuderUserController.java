@@ -1,14 +1,9 @@
 package com.carrot.kuder.user;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,24 +26,28 @@ public class KuderUserController {
 	@Autowired
 	private KuderUserService kuderUserService;
 	
-	// 사용자정보 조회 /user/{id}
+	// 사용자정보 조회 /user/{id} 필요없을거 같음 session에 담아주면 되니까 마이페이지 같은곳에서도
 	/*
-	 * @GetMapping(value="/{id}")
-	 * 
-	 * @ApiOperation(value="사용자정보 조회") public KuderUserWrapper
-	 * selectUser(@PathVariable("id") int id) throws Exception {
-	 * 
-	 * log.info("###### userSelect id : " + id); KuderUserWrapper kuw = new
-	 * KuderUserWrapper(); kuw.setUser(kuderUserService.selectUser(id));
-	 * 
-	 * return kuw; }
-	 */
+	@GetMapping(value="/{idx}")
+	@ApiOperation(value="사용자정보 조회")
+	public KuderUserWrapper selectUser(@PathVariable("idx") int idx) throws Exception {
+	  
+		log.info("###### userSelect idx : " + idx);
+		KuderUserWrapper kuw = new
+		KuderUserWrapper();
+		kuw.setUser(kuderUserService.selectUser(idx));
+		
+		return kuw;
+	}
+	*/
+	 
 	
-	@GetMapping(value="/info/{idx}")
-	    public ResponseEntity<Map<Object, Object>> dataone(@PathVariable("idx") int idx) {
-	        ResponseEntity<Map<Object, Object>> rtn = new ResponseEntity<Map<Object, Object>>(kuderUserService.selectUser(idx), HttpStatus.OK);
-	        return rtn;
-	    }
+	/*
+	 * @GetMapping(value="/info/{idx}") public ResponseEntity<Map<Object, Object>>
+	 * dataone(@PathVariable("idx") int idx) { ResponseEntity<Map<Object, Object>>
+	 * rtn = new ResponseEntity<Map<Object,
+	 * Object>>(kuderUserService.selectUser(idx), HttpStatus.OK); return rtn; }
+	 */
 
 	 
 	
@@ -66,9 +65,9 @@ public class KuderUserController {
 	}
 	
 	// 만약에 TIN 넘버 조회면 /user/{id}/tin
-	@GetMapping(value="/{id}/tin")
+	@GetMapping(value="/{idx}/tin")
 	@ApiOperation(value="사용자 TIN'S 조회")
-	public void selectUserTins(@PathVariable("id") int id) throws Exception {
+	public void selectUserTins(@PathVariable("idx") int idx) throws Exception {
 		
 		log.info("###### selectUserTin");
 	}
@@ -81,6 +80,7 @@ public class KuderUserController {
 	 * @return
 	 * @throws Exception
 	 */
+	/*
 	@PostMapping(value="")
 	@ApiOperation(value="사용자정보 추가")
 	public KuderUserWrapper insertUser(@RequestBody KuderUserDTO dto) throws Exception {
@@ -98,19 +98,20 @@ public class KuderUserController {
 		return kuw;
 		
 	}
-	
+	*/
 	//@PatchMapping
 	// 사용자정보 수정 /user/{id} -> pathch
-	@PutMapping(value="/{id}")
+	@PutMapping(value="/{idx}")
 	@ApiOperation(value="사용자정보 수정")
-	public KuderUserWrapper updateUser(@PathVariable("id") int id, @RequestBody KuderUserDTO dto) throws Exception {
+	public KuderUserWrapper updateUser(@PathVariable("idx") int idx, @RequestBody KuderUserDTO dto) throws Exception {
 		
 		log.info("###### updateUser");
 		log.info("#### user Info : " + dto.toString());
 		
 		KuderUserWrapper kuw = new KuderUserWrapper();
 		String result = "";
-		dto.setUserId(id);
+		// session에서 꺼내야 하는게 아닌지?
+		dto.setIdx(idx);
 		result = kuderUserService.updateUser(dto);
 		
 		kuw.setUser(dto);
@@ -121,7 +122,7 @@ public class KuderUserController {
 	}
 	
 	// 사용자정보 삭제 /user/{id}
-	@DeleteMapping(value="/{id}")
+	@DeleteMapping(value="/{idx}")
 	@ApiOperation(value="사용자정보 삭제")
 	public void deleteUser() throws Exception {
 		
@@ -130,7 +131,7 @@ public class KuderUserController {
 	}
 	
 	// 사용자 패스워드 수정 /user/{id}/password
-	@PutMapping(value="/{id}/password")
+	@PutMapping(value="/{idx}/password")
 	@ApiOperation(value="사용자패스워드 수정")
 	public void updateUserPassword() throws Exception {
 		
@@ -139,7 +140,7 @@ public class KuderUserController {
 	}
 	
 	// 사용자 패스워드 초기화 /user/{id}/password-init
-	@PutMapping(value="/{id}/password-init")
+	@PutMapping(value="/{idx}/password-init")
 	@ApiOperation(value="사용자패스워드 초기화")
 	public void initUserPassword() throws Exception {
 		

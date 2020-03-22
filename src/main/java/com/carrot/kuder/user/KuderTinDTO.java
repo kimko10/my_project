@@ -2,9 +2,7 @@ package com.carrot.kuder.user;
 
 import java.util.Date;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -16,8 +14,11 @@ public class KuderTinDTO extends KuderTinVO {
 	// TIN번호 평가 TIN 번호
     private String tinNumber;
 
-    // 이메일 사용자 이메일
-    private String userEmail;
+    // 사용자ID 사용자 ID
+    private int idxKuderUser;
+
+    // 엑티베이션ID 평가 활성 코드 ID
+    private int idxKuderActivationCode;
 
     // 상품명 Atlas 성인(Journey) / Atlas 중고등(Navigator)
     private String productName;
@@ -39,6 +40,9 @@ public class KuderTinDTO extends KuderTinVO {
 
     // 최근평가일 최근평가일(평가 완료 시점)
     private Date recentlyAssmDate;
+
+    // 사용가능여부 Y/N
+    private String useType;
 
     // 엑티베이션코드 평가 활성 코드
     private String activationCode;

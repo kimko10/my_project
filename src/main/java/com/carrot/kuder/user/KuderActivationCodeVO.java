@@ -15,7 +15,10 @@ import lombok.ToString;
 @ToString
 public class KuderActivationCodeVO extends CommonVO{
 	
-	// 엑티베이션코드 평가 활성 코드
+	// 엑티베이션ID 엑티베이션 ID
+    private int idx;
+
+    // 엑티베이션코드 평가 활성 코드
     private String activationCode;
 
     // 총개수 평가 활성 코드가 가진 TIN 번호 개수
@@ -40,9 +43,12 @@ public class KuderActivationCodeVO extends CommonVO{
     private String userType;
 
     // B2B그룹코드 B2B그룹코드
-    private int bbGroupCode;
+    private int idxKuderBbGroup;
 
     // 이메일 결제자 이메일
     private String userEmail;
+
+    // 사용가능여부 Y/N
+    private String useType;
 
 }

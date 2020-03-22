@@ -17,10 +17,19 @@ import lombok.ToString;
 public class KuderGroupVO extends CommonVO {
 
 	// B2B그룹코드 B2B그룹코드
-    private int bbGroupCode;
+    private int idx;
 
     // B2B그룹명 B2B그룹명
     private String bbGroupName;
+
+    // 회사코드 회사코드
+    private int idxKuderCompany;
+
+    // HQ담당자 idx HQ 담당자 idx
+    private int idxHq;
+
+    // 고객사 담당자 idx 고객사의 담당자 이메일
+    private int idxKuderAdmin;
 
     // 회사명 회사명
     private String companyName;

@@ -9,16 +9,6 @@ spring:
       force: true
 --- ## local 환경
 # DB설정
-# properties 파일로 할 때
-#spring.datasource.username=itest
-#spring.datasource.password=dusrn1
-#spring.datasource.url=jdbc:mariadb://mxm.kr:23306/itest
-#spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-# properties 파일로 하고 hikariCP 사용 때
-#spring.datasource.hikari.username=itest
-#spring.datasource.hikari.password=dusrn1
-#spring.datasource.hikari.jdbc-url=jdbc:mariadb://mxm.kr:23306/itest
-#spring.datasource.hikari.driver-class-name=org.mariadb.jdbc.Driver
 spring: 
    profiles: local
    datasource:
@@ -26,11 +16,11 @@ spring:
      #username: carrot
      #password: ghavpdlwl1
      #jdbc-url: jdbc:log4jdbc:mariadb://49.247.213.177:23306/carrot_farm
-     username: kudertest
-     password: kuder1234
-     jdbc-url: jdbc:mariadb://localhost:3306/kuderlocal
+     username: test
+     password: pwd
+     jdbc-url: jdbc:log4jdbc:mariadb://localhost:32773/kuder
      #jdbc-url : jdbc:mariadb://mxm.kr:23306/itest
-     driver-class-name : org.mariadb.jdbc.Driver 
+     driver-class-name : net.sf.log4jdbc.sql.jdbcapi.DriverSpy
      #jdbc-url: jdbc:log4jdbc:mariadb://mxm.kr:23306/itest
     # driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
    #mvc:
